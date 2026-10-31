@@ -1,0 +1,80 @@
+{
+  "$schema": "https://static.modelcontextprotocol.io/schemas/2025-12-11/server.schema.json",
+  "name": "io.github.afeezadebayo/google-keyword-planner",
+  "title": "Google Keyword Planner",
+  "description": "Keyword ideas, search volumes, CPC ranges, trends and forecasts from Google Ads Keyword Planner.",
+  "version": "1.0.0",
+  "websiteUrl": "https://github.com/afeezadebayo/google-keyword-planner-mcp",
+  "repository": {
+    "url": "https://github.com/afeezadebayo/google-keyword-planner-mcp",
+    "source": "github"
+  },
+  "packages": [
+    {
+      "registryType": "mcpb",
+      "identifier": "https://github.com/afeezadebayo/google-keyword-planner-mcp/releases/download/v1.0.0/google-keyword-planner.mcpb",
+      "fileSha256": "0000000000000000000000000000000000000000000000000000000000000000",
+      "transport": {
+        "type": "stdio"
+      },
+      "environmentVariables": [
+        {
+          "name": "GOOGLE_ADS_DEVELOPER_TOKEN",
+          "description": "Google Ads API developer token (Basic access for real data)",
+          "isRequired": true,
+          "isSecret": true,
+          "format": "string"
+        },
+        {
+          "name": "GOOGLE_ADS_CLIENT_ID",
+          "description": "Google Cloud OAuth client ID (Desktop app)",
+          "isRequired": true,
+          "isSecret": false,
+          "format": "string"
+        },
+        {
+          "name": "GOOGLE_ADS_CLIENT_SECRET",
+          "description": "Google Cloud OAuth client secret",
+          "isRequired": true,
+          "isSecret": true,
+          "format": "string"
+        },
+        {
+          "name": "GOOGLE_ADS_REFRESH_TOKEN",
+          "description": "OAuth refresh token for the adwords scope",
+          "isRequired": true,
+          "isSecret": true,
+          "format": "string"
+        },
+        {
+          "name": "GOOGLE_ADS_CUSTOMER_ID",
+          "description": "Google Ads account ID to query, e.g. 123-456-7890",
+          "isRequired": true,
+          "isSecret": false,
+          "format": "string"
+        },
+        {
+          "name": "GOOGLE_ADS_LOGIN_CUSTOMER_ID",
+          "description": "Manager account ID, if access is through a manager account",
+          "isRequired": false,
+          "isSecret": false,
+          "format": "string"
+        },
+        {
+          "name": "KEYWORD_PLANNER_DEFAULT_LANGUAGE",
+          "description": "Default language, e.g. English",
+          "isRequired": false,
+          "isSecret": false,
+          "format": "string"
+        },
+        {
+          "name": "KEYWORD_PLANNER_DEFAULT_LOCATIONS",
+          "description": "Default locations, comma-separated, e.g. Nigeria",
+          "isRequired": false,
+          "isSecret": false,
+          "format": "string"
+        }
+      ]
+    }
+  ]
+}

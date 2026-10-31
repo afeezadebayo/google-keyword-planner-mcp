@@ -1,2 +1,122 @@
-# google-keyword-planner-mcp
-MCP server for Google Ads Keyword Planner: keyword ideas, search volumes, CPC ranges, trends and forecasts for Claude, ChatGPT and other AI assistants.
+# Google Keyword Planner MCP server
+
+<!-- mcp-name: io.github.afeezadebayo/google-keyword-planner -->
+
+An MCP server that gives Claude and other MCP clients direct access to Google Ads Keyword Planner data: keyword ideas, average monthly searches, competition, top-of-page bid ranges, monthly trends and click and cost forecasts.
+
+Built by [Afeez Adebayo](https://afeezadebayo.com). MIT licensed.
+
+## What you can ask
+
+- "Find 100 keyword ideas for *online accounting software* in Nigeria, sorted by search volume."
+- "Get search volume for these 50 keywords in the UK and US, with their trends."
+- "Pull keyword ideas from https://example.com/pricing."
+- "Forecast clicks and cost for these exact-match keywords at a ₦300 max CPC for 30 days."
+
+## Tools
+
+| Tool | What it does |
+| --- | --- |
+| `generate_keyword_ideas` | Ideas from seed keywords, a URL, keywords plus a URL, or a whole site. Returns average monthly searches, competition, low and high top-of-page bids, 3-month change, change across the period (first to last month shown), and optional monthly volumes. Filter by minimum volume and sort by searches, competition, bid or relevance. |
+| `get_search_volume` | Historical metrics for up to 10,000 exact keywords, with close variants and a list of keywords Google returned no data for. Optional month range. |
+| `forecast_keywords` | Impressions, clicks, cost, CTR and average CPC for keywords at a given max CPC over 1 to 365 days. |
+| `find_locations` | Look up Google location IDs by place name. |
+| `list_languages` | List targetable languages with codes and IDs. |
+| `list_accessible_customers` | List the Google Ads accounts your login can access. |
+| `check_connection` | Confirm credentials and show the account, currency and defaults. |
+
+Locations and languages accept plain names (`"Nigeria"`, `"Lagos"`, `"English"`) as well as Google IDs. Bids and costs are shown in your Google Ads account currency.
+
+## What you need
+
+Keyword Planner data comes from the Google Ads API, so you need:
+
+1. **A Google Ads account.** It must be enabled, but it doesn't need running campaigns.
+2. **A developer token with Basic access.** In a Google Ads [manager account](https://ads.google.com/home/tools/manager-accounts/), go to Tools > Setup > API Center and apply. A new token starts with test access, which only works with test accounts and returns no real keyword data; apply for Basic access to use real accounts.
+3. **A Google Cloud OAuth client.** In the [Google Cloud console](https://console.cloud.google.com/): create a project, enable the Google Ads API, configure the OAuth consent screen, and create an OAuth client ID of type **Desktop app**. Set the consent screen's publishing status to **In production**, because refresh tokens from apps in Testing status expire after 7 days.
+4. **A refresh token.** Clone this folder and run:
+
+   ```bash
+   npm install
+   GOOGLE_ADS_CLIENT_ID=your-client-id GOOGLE_ADS_CLIENT_SECRET=your-secret npm run auth
+   ```
+
+   Open the printed link, sign in with the Google account that can access your Ads account, and copy the refresh token it prints.
+
+## Install
+
+### Claude Desktop (one click)
+
+Download `google-keyword-planner.mcpb` from the [latest release](https://github.com/afeezadebayo/google-keyword-planner-mcp/releases/latest) and open it. Claude Desktop asks for your credentials and stores the secrets securely.
+
+### Any MCP client (from source)
+
+```bash
+git clone https://github.com/afeezadebayo/google-keyword-planner-mcp.git
+cd google-keyword-planner-mcp
+npm install && npm run build
+```
+
+Then add it to your client config:
+
+```json
+{
+  "mcpServers": {
+    "google-keyword-planner": {
+      "command": "node",
+      "args": ["/path/to/google-keyword-planner-mcp/server/index.js"],
+      "env": {
+        "GOOGLE_ADS_DEVELOPER_TOKEN": "...",
+        "GOOGLE_ADS_CLIENT_ID": "...",
+        "GOOGLE_ADS_CLIENT_SECRET": "...",
+        "GOOGLE_ADS_REFRESH_TOKEN": "...",
+        "GOOGLE_ADS_CUSTOMER_ID": "123-456-7890",
+        "GOOGLE_ADS_LOGIN_CUSTOMER_ID": "",
+        "KEYWORD_PLANNER_DEFAULT_LANGUAGE": "English",
+        "KEYWORD_PLANNER_DEFAULT_LOCATIONS": "Nigeria"
+      }
+    }
+  }
+}
+```
+
+For Claude Code:
+
+```bash
+claude mcp add google-keyword-planner \
+  -e GOOGLE_ADS_DEVELOPER_TOKEN=... -e GOOGLE_ADS_CLIENT_ID=... -e GOOGLE_ADS_CLIENT_SECRET=... \
+  -e GOOGLE_ADS_REFRESH_TOKEN=... -e GOOGLE_ADS_CUSTOMER_ID=123-456-7890 \
+  -- node /path/to/google-keyword-planner-mcp/server/index.js
+```
+
+## Configuration
+
+| Variable | Required | Notes |
+| --- | --- | --- |
+| `GOOGLE_ADS_DEVELOPER_TOKEN` | Yes | Basic access or higher for real data. |
+| `GOOGLE_ADS_CLIENT_ID` | Yes | OAuth client (Desktop app). |
+| `GOOGLE_ADS_CLIENT_SECRET` | Yes | |
+| `GOOGLE_ADS_REFRESH_TOKEN` | Yes | From `npm run auth`. |
+| `GOOGLE_ADS_CUSTOMER_ID` | Yes | The account to query. Dashes are fine. |
+| `GOOGLE_ADS_LOGIN_CUSTOMER_ID` | No | Your manager account ID, if you access the account through one. |
+| `GOOGLE_ADS_API_VERSION` | No | Defaults to `v25`. Change it when Google retires a version. |
+| `KEYWORD_PLANNER_DEFAULT_LANGUAGE` | No | Used when a request doesn't name a language. |
+| `KEYWORD_PLANNER_DEFAULT_LOCATIONS` | No | Comma-separated names or IDs used when a request doesn't name locations. |
+
+## Good to know
+
+- **Volumes are estimates.** Keyword Planner rounds search volumes into ranges and groups close variants. Accounts with little or no ad spend may see broader ranges.
+- **Rate limits.** Keyword Planner allows a limited number of requests per minute. The server retries rate-limit and server errors automatically with back-off.
+- **Errors explain the fix.** Common problems (a test-only developer token, a missing manager account ID, an expired refresh token) come back with a plain-English explanation of how to fix them.
+- **Privacy.** The server runs on your machine and talks only to Google. Credentials stay in your MCP client's config.
+
+## Development
+
+```bash
+npm install
+npm run typecheck
+npm run build
+npm test   # runs every tool against a local mock of the Google Ads API
+```
+
+Releases are automated: bumping `version` in `package.json` and pushing to `main` builds the bundle, creates a GitHub release and publishes the listing to the official [MCP Registry](https://registry.modelcontextprotocol.io).

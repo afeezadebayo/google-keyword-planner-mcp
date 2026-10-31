@@ -1,0 +1,44 @@
+{
+  "name": "google-keyword-planner-mcp",
+  "version": "1.0.0",
+  "description": "MCP server for Google Ads Keyword Planner: keyword ideas, search volumes, CPC ranges, trends and forecasts.",
+  "type": "module",
+  "license": "MIT",
+  "author": "Afeez Adebayo (https://afeezadebayo.com)",
+  "main": "server/index.js",
+  "bin": {
+    "google-keyword-planner-mcp": "server/index.js"
+  },
+  "files": [
+    "server",
+    "manifest.json",
+    "README.md",
+    "LICENSE"
+  ],
+  "engines": {
+    "node": ">=18"
+  },
+  "scripts": {
+    "build": "esbuild src/index.ts --bundle --platform=node --format=esm --target=node18 --outfile=server/index.js --banner:js=\"#!/usr/bin/env node\nimport { createRequire } from 'module'; const require = createRequire(import.meta.url);\"",
+    "typecheck": "tsc --noEmit",
+    "test": "node scripts/smoke-test.mjs",
+    "auth": "node scripts/get-refresh-token.mjs"
+  },
+  "dependencies": {
+    "@modelcontextprotocol/sdk": "1.32.1",
+    "zod": "3.25.76"
+  },
+  "devDependencies": {
+    "@types/node": "22.20.5",
+    "esbuild": "0.28.2",
+    "typescript": "5.9.3"
+  },
+  "keywords": [
+    "mcp",
+    "google-ads",
+    "keyword-planner",
+    "seo",
+    "keyword-research",
+    "ppc"
+  ]
+}

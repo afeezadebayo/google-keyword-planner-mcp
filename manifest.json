@@ -1,0 +1,144 @@
+{
+  "manifest_version": "0.3",
+  "name": "google-keyword-planner-mcp",
+  "display_name": "Google Keyword Planner",
+  "version": "1.0.0",
+  "description": "Keyword ideas, search volumes, CPC ranges, trends and forecasts from Google Ads Keyword Planner.",
+  "long_description": "Research keywords with Google Ads Keyword Planner data from any MCP client. Generate ideas from seed keywords, a URL or a whole site; get monthly search volumes, competition and top-of-page bid ranges for exact keywords; forecast clicks and cost; and look up location and language IDs. Locations and languages accept plain names like \"Nigeria\" and \"English\". Requires a Google Ads account, a developer token with Basic access, and an OAuth client.",
+  "author": {
+    "name": "Afeez Adebayo",
+    "url": "https://afeezadebayo.com"
+  },
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/afeezadebayo/google-keyword-planner-mcp"
+  },
+  "homepage": "https://github.com/afeezadebayo/google-keyword-planner-mcp",
+  "documentation": "https://github.com/afeezadebayo/google-keyword-planner-mcp#readme",
+  "support": "https://github.com/afeezadebayo/google-keyword-planner-mcp/issues",
+  "license": "MIT",
+  "keywords": [
+    "google ads",
+    "keyword planner",
+    "seo",
+    "keyword research",
+    "ppc",
+    "search volume"
+  ],
+  "server": {
+    "type": "node",
+    "entry_point": "server/index.js",
+    "mcp_config": {
+      "command": "node",
+      "args": [
+        "${__dirname}/server/index.js"
+      ],
+      "env": {
+        "GOOGLE_ADS_DEVELOPER_TOKEN": "${user_config.developer_token}",
+        "GOOGLE_ADS_CLIENT_ID": "${user_config.client_id}",
+        "GOOGLE_ADS_CLIENT_SECRET": "${user_config.client_secret}",
+        "GOOGLE_ADS_REFRESH_TOKEN": "${user_config.refresh_token}",
+        "GOOGLE_ADS_CUSTOMER_ID": "${user_config.customer_id}",
+        "GOOGLE_ADS_LOGIN_CUSTOMER_ID": "${user_config.login_customer_id}",
+        "KEYWORD_PLANNER_DEFAULT_LANGUAGE": "${user_config.default_language}",
+        "KEYWORD_PLANNER_DEFAULT_LOCATIONS": "${user_config.default_locations}"
+      }
+    }
+  },
+  "tools": [
+    {
+      "name": "generate_keyword_ideas",
+      "description": "Keyword ideas from seed keywords, a URL or a site, with volumes, competition, bids and trends."
+    },
+    {
+      "name": "get_search_volume",
+      "description": "Historical search volume and metrics for specific keywords."
+    },
+    {
+      "name": "forecast_keywords",
+      "description": "Forecast impressions, clicks and cost for keywords at a max CPC."
+    },
+    {
+      "name": "find_locations",
+      "description": "Find Google location IDs by name."
+    },
+    {
+      "name": "list_languages",
+      "description": "List targetable languages and their IDs."
+    },
+    {
+      "name": "list_accessible_customers",
+      "description": "List Google Ads accounts you can access."
+    },
+    {
+      "name": "check_connection",
+      "description": "Check credentials and show account settings."
+    }
+  ],
+  "user_config": {
+    "developer_token": {
+      "type": "string",
+      "title": "Developer token",
+      "description": "From the API Center in your Google Ads manager account. Needs Basic access for real data.",
+      "sensitive": true,
+      "required": true
+    },
+    "client_id": {
+      "type": "string",
+      "title": "OAuth client ID",
+      "description": "Google Cloud OAuth client (Desktop app).",
+      "required": true
+    },
+    "client_secret": {
+      "type": "string",
+      "title": "OAuth client secret",
+      "description": "From the same Google Cloud OAuth client.",
+      "sensitive": true,
+      "required": true
+    },
+    "refresh_token": {
+      "type": "string",
+      "title": "Refresh token",
+      "description": "Create one with `npm run auth` (see README).",
+      "sensitive": true,
+      "required": true
+    },
+    "customer_id": {
+      "type": "string",
+      "title": "Customer ID",
+      "description": "The Google Ads account to query, e.g. 123-456-7890.",
+      "required": true
+    },
+    "login_customer_id": {
+      "type": "string",
+      "title": "Manager account ID (optional)",
+      "description": "Only if you access the account through a manager account.",
+      "required": false,
+      "default": ""
+    },
+    "default_language": {
+      "type": "string",
+      "title": "Default language (optional)",
+      "description": "e.g. English. Leave blank for all languages.",
+      "required": false,
+      "default": ""
+    },
+    "default_locations": {
+      "type": "string",
+      "title": "Default locations (optional)",
+      "description": "Comma-separated names or IDs, e.g. Nigeria, United Kingdom.",
+      "required": false,
+      "default": ""
+    }
+  },
+  "compatibility": {
+    "platforms": [
+      "darwin",
+      "win32",
+      "linux"
+    ],
+    "runtimes": {
+      "node": ">=18.0.0"
+    }
+  }
+}
