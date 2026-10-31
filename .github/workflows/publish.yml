@@ -1,0 +1,79 @@
+name: Release and publish to MCP Registry
+
+on:
+  push:
+    branches: [main]
+  workflow_dispatch:
+
+permissions:
+  contents: write   # create the GitHub release
+  id-token: write   # GitHub OIDC login to the MCP Registry
+
+concurrency:
+  group: release
+  cancel-in-progress: false
+
+jobs:
+  release:
+    runs-on: ubuntu-latest
+    env:
+      GH_TOKEN: ${{ github.token }}
+    steps:
+      - uses: actions/checkout@v5
+
+      - uses: actions/setup-node@v5
+        with:
+          node-version: "22"
+
+      - name: Install, typecheck, build and test
+        run: |
+          npm install --no-audit --no-fund
+          npm run typecheck
+          npm run build
+          npm test
+
+      - name: Work out version
+        id: v
+        run: |
+          VERSION=$(node -p "require('./package.json').version")
+          TAG="v${VERSION}"
+          echo "version=$VERSION" >> "$GITHUB_OUTPUT"
+          echo "tag=$TAG" >> "$GITHUB_OUTPUT"
+          if gh release view "$TAG" --repo "$GITHUB_REPOSITORY" >/dev/null 2>&1; then
+            echo "exists=true" >> "$GITHUB_OUTPUT"
+            echo "Release $TAG already exists; nothing to publish."
+          else
+            echo "exists=false" >> "$GITHUB_OUTPUT"
+          fi
+
+      - name: Pack the MCPB bundle
+        if: steps.v.outputs.exists == 'false'
+        run: |
+          jq --arg v "${{ steps.v.outputs.version }}" '.version = $v' manifest.json > m.tmp && mv m.tmp manifest.json
+          npx -y @anthropic-ai/mcpb@2.1.2 validate manifest.json
+          npx -y @anthropic-ai/mcpb@2.1.2 pack . google-keyword-planner.mcpb
+          echo "SHA=$(sha256sum google-keyword-planner.mcpb | cut -d' ' -f1)" >> "$GITHUB_ENV"
+
+      - name: Create GitHub release
+        if: steps.v.outputs.exists == 'false'
+        run: |
+          gh release create "${{ steps.v.outputs.tag }}" google-keyword-planner.mcpb \
+            --repo "$GITHUB_REPOSITORY" \
+            --target "$GITHUB_SHA" \
+            --title "Google Keyword Planner MCP v${{ steps.v.outputs.version }}" \
+            --notes "Install in Claude Desktop by opening google-keyword-planner.mcpb. Setup guide: https://github.com/${GITHUB_REPOSITORY}#readme"
+
+      - name: Prepare server.json
+        if: steps.v.outputs.exists == 'false'
+        run: |
+          URL="https://github.com/${GITHUB_REPOSITORY}/releases/download/${{ steps.v.outputs.tag }}/google-keyword-planner.mcpb"
+          jq --arg v "${{ steps.v.outputs.version }}" --arg url "$URL" --arg sha "$SHA" \
+            '.version = $v | .packages[0].identifier = $url | .packages[0].fileSha256 = $sha' server.json > s.tmp && mv s.tmp server.json
+          cat server.json
+
+      - name: Publish to the MCP Registry
+        if: steps.v.outputs.exists == 'false'
+        run: |
+          curl -sL "https://github.com/modelcontextprotocol/registry/releases/latest/download/mcp-publisher_linux_amd64.tar.gz" | tar xz mcp-publisher
+          ./mcp-publisher login github-oidc
+          ./mcp-publisher publish
