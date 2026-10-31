@@ -1,6 +1,6 @@
 /**
  * Minimal Google Ads REST client for Keyword Planner endpoints.
- * Auth: OAuth2 refresh token + developer token. No Google client library needed.
+ * Auth: OAuth2 refresh token. API access level comes from the OAuth client's Google Cloud project.
  */
 
 export interface Config {
@@ -36,7 +36,6 @@ export function loadConfig(env = process.env): Config {
 
 export function missingConfig(cfg: Config): string[] {
   const need: [keyof Config, string][] = [
-    ["developerToken", "GOOGLE_ADS_DEVELOPER_TOKEN"],
     ["clientId", "GOOGLE_ADS_CLIENT_ID"],
     ["clientSecret", "GOOGLE_ADS_CLIENT_SECRET"],
     ["refreshToken", "GOOGLE_ADS_REFRESH_TOKEN"],
@@ -65,10 +64,10 @@ function explainError(status: number, body: any): string {
   }
   const all = (codes.join(" ") + " " + (err?.message ?? "")).toUpperCase();
   let hint = "";
-  if (all.includes("DEVELOPER_TOKEN_NOT_APPROVED") || all.includes("ONLY_APPROVED_FOR_TEST_ACCOUNTS"))
-    hint = "Your developer token only has test access. Apply for Basic access in the Google Ads API Center (Tools > Setup > API Center in your manager account) to get real keyword data.";
+  if (all.includes("CLOUD_PROJECT_NOT_APPROVED_FOR_PRODUCTION") || all.includes("DEVELOPER_TOKEN_NOT_APPROVED") || all.includes("ONLY_APPROVED_FOR_TEST_ACCOUNTS") || all.includes("ACTION_NOT_PERMITTED"))
+    hint = "Your Google Cloud project only has Test access to the Google Ads API. In Google Cloud Console, open the Google Ads API Overview page for the project that owns your OAuth client and apply for Basic access (it needs brand verification of your OAuth consent screen). Explorer access doesn't include Keyword Planner.";
   else if (all.includes("DEVELOPER_TOKEN_INVALID") || all.includes("DEVELOPER_TOKEN_PROHIBITED"))
-    hint = "The developer token is invalid. Copy it again from the API Center of your Google Ads manager account.";
+    hint = "Google rejected the developer token. Developer tokens were retired on 9 September 2026; remove GOOGLE_ADS_DEVELOPER_TOKEN from your config, because access now comes from your Google Cloud project.";
   else if (all.includes("USER_PERMISSION_DENIED"))
     hint = "The signed-in Google user can't access this customer. If you access it through a manager account, set GOOGLE_ADS_LOGIN_CUSTOMER_ID to the manager account ID.";
   else if (all.includes("CUSTOMER_NOT_ENABLED") || all.includes("NOT_ACTIVE"))
@@ -116,9 +115,10 @@ export class AdsClient {
   async request(method: "GET" | "POST", path: string, body?: unknown, attempt = 0): Promise<any> {
     const headers: Record<string, string> = {
       authorization: `Bearer ${await this.accessToken()}`,
-      "developer-token": this.cfg.developerToken,
       "content-type": "application/json",
     };
+    // Developer tokens were retired on 9 September 2026; access now comes from the OAuth client's Cloud project.
+    if (this.cfg.developerToken) headers["developer-token"] = this.cfg.developerToken;
     if (this.cfg.loginCustomerId) headers["login-customer-id"] = this.cfg.loginCustomerId;
     const base = (process.env.GOOGLE_ADS_API_BASE_URL || "https://googleads.googleapis.com").replace(/\/$/, "");
     const url = `${base}/${this.cfg.apiVersion}/${path}`;

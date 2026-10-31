@@ -1,6 +1,6 @@
 {
   "name": "google-keyword-planner-mcp",
-  "version": "1.0.0",
+  "version": "1.1.0",
   "description": "MCP server for Google Ads Keyword Planner: keyword ideas, search volumes, CPC ranges, trends and forecasts.",
   "type": "module",
   "license": "MIT",

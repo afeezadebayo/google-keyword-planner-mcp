@@ -29,12 +29,16 @@ Locations and languages accept plain names (`"Nigeria"`, `"Lagos"`, `"English"`)
 
 ## What you need
 
-Keyword Planner data comes from the Google Ads API, so you need:
+Keyword Planner data comes from the Google Ads API. Since **9 September 2026**, Google no longer uses developer tokens: API access belongs to the Google Cloud project that owns your OAuth client. You need:
 
-1. **A Google Ads account.** It must be enabled, but it doesn't need running campaigns.
-2. **A developer token with Basic access.** In a Google Ads [manager account](https://ads.google.com/home/tools/manager-accounts/), go to Tools > Setup > API Center and apply. A new token starts with test access, which only works with test accounts and returns no real keyword data; apply for Basic access to use real accounts.
-3. **A Google Cloud OAuth client.** In the [Google Cloud console](https://console.cloud.google.com/): create a project, enable the Google Ads API, configure the OAuth consent screen, and create an OAuth client ID of type **Desktop app**. Set the consent screen's publishing status to **In production**, because refresh tokens from apps in Testing status expire after 7 days.
-4. **A refresh token.** Clone this folder and run:
+1. **A Google Ads account.** It must be enabled, but it doesn't need running campaigns. A manager account is optional.
+2. **A Google Cloud project with the Google Ads API enabled.** In the [Google Cloud console](https://console.cloud.google.com/), create a project and enable the Google Ads API. This gives Test access, which only works with test accounts.
+3. **Basic access for that project.** Keyword Planner isn't included in Explorer access, so you need Basic access:
+   - Configure the OAuth consent screen (Google Auth Platform > Branding) and complete **brand verification**.
+   - Open the [Google Ads API Overview page](https://console.cloud.google.com/google/ads-apis/overview) for the project and apply for Basic access. Google reviews it automatically, usually within minutes of brand verification.
+   - If your project is on the Google Cloud free trial, Google may reject the application; upgrading the billing account to a paid tier fixes this (you won't be charged for the Google Ads API).
+4. **An OAuth client ID** of type **Desktop app**, in the same project. Set the consent screen's publishing status to **In production**, because refresh tokens from apps in Testing status expire after 7 days.
+5. **A refresh token.** Clone this repository and run:
 
    ```bash
    npm install
@@ -66,7 +70,6 @@ Then add it to your client config:
       "command": "node",
       "args": ["/path/to/google-keyword-planner-mcp/server/index.js"],
       "env": {
-        "GOOGLE_ADS_DEVELOPER_TOKEN": "...",
         "GOOGLE_ADS_CLIENT_ID": "...",
         "GOOGLE_ADS_CLIENT_SECRET": "...",
         "GOOGLE_ADS_REFRESH_TOKEN": "...",
@@ -84,7 +87,7 @@ For Claude Code:
 
 ```bash
 claude mcp add google-keyword-planner \
-  -e GOOGLE_ADS_DEVELOPER_TOKEN=... -e GOOGLE_ADS_CLIENT_ID=... -e GOOGLE_ADS_CLIENT_SECRET=... \
+  -e GOOGLE_ADS_CLIENT_ID=... -e GOOGLE_ADS_CLIENT_SECRET=... \
   -e GOOGLE_ADS_REFRESH_TOKEN=... -e GOOGLE_ADS_CUSTOMER_ID=123-456-7890 \
   -- node /path/to/google-keyword-planner-mcp/server/index.js
 ```
@@ -93,8 +96,7 @@ claude mcp add google-keyword-planner \
 
 | Variable | Required | Notes |
 | --- | --- | --- |
-| `GOOGLE_ADS_DEVELOPER_TOKEN` | Yes | Basic access or higher for real data. |
-| `GOOGLE_ADS_CLIENT_ID` | Yes | OAuth client (Desktop app). |
+| `GOOGLE_ADS_CLIENT_ID` | Yes | OAuth client (Desktop app). Its Cloud project needs Basic access. |
 | `GOOGLE_ADS_CLIENT_SECRET` | Yes | |
 | `GOOGLE_ADS_REFRESH_TOKEN` | Yes | From `npm run auth`. |
 | `GOOGLE_ADS_CUSTOMER_ID` | Yes | The account to query. Dashes are fine. |
@@ -102,12 +104,13 @@ claude mcp add google-keyword-planner \
 | `GOOGLE_ADS_API_VERSION` | No | Defaults to `v25`. Change it when Google retires a version. |
 | `KEYWORD_PLANNER_DEFAULT_LANGUAGE` | No | Used when a request doesn't name a language. |
 | `KEYWORD_PLANNER_DEFAULT_LOCATIONS` | No | Comma-separated names or IDs used when a request doesn't name locations. |
+| `GOOGLE_ADS_DEVELOPER_TOKEN` | No | Legacy. Google retired developer tokens on 9 September 2026; it's only sent if you set it. |
 
 ## Good to know
 
 - **Volumes are estimates.** Keyword Planner rounds search volumes into ranges and groups close variants. Accounts with little or no ad spend may see broader ranges.
 - **Rate limits.** Keyword Planner allows a limited number of requests per minute. The server retries rate-limit and server errors automatically with back-off.
-- **Errors explain the fix.** Common problems (a test-only developer token, a missing manager account ID, an expired refresh token) come back with a plain-English explanation of how to fix them.
+- **Errors explain the fix.** Common problems (a Cloud project with only Test access, a missing manager account ID, an expired refresh token) come back with a plain-English explanation of how to fix them.
 - **Privacy.** The server runs on your machine and talks only to Google. Credentials stay in your MCP client's config.
 
 ## Development

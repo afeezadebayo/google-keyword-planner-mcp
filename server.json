@@ -3,7 +3,7 @@
   "name": "io.github.afeezadebayo/google-keyword-planner",
   "title": "Google Keyword Planner",
   "description": "Keyword ideas, search volumes, CPC ranges, trends and forecasts from Google Ads Keyword Planner.",
-  "version": "1.0.0",
+  "version": "1.1.0",
   "websiteUrl": "https://github.com/afeezadebayo/google-keyword-planner-mcp",
   "repository": {
     "url": "https://github.com/afeezadebayo/google-keyword-planner-mcp",
@@ -19,15 +19,8 @@
       },
       "environmentVariables": [
         {
-          "name": "GOOGLE_ADS_DEVELOPER_TOKEN",
-          "description": "Google Ads API developer token (Basic access for real data)",
-          "isRequired": true,
-          "isSecret": true,
-          "format": "string"
-        },
-        {
           "name": "GOOGLE_ADS_CLIENT_ID",
-          "description": "Google Cloud OAuth client ID (Desktop app)",
+          "description": "Google Cloud OAuth client ID (Desktop app); its project needs Basic access to the Google Ads API",
           "isRequired": true,
           "isSecret": false,
           "format": "string"
@@ -72,6 +65,13 @@
           "description": "Default locations, comma-separated, e.g. Nigeria",
           "isRequired": false,
           "isSecret": false,
+          "format": "string"
+        },
+        {
+          "name": "GOOGLE_ADS_DEVELOPER_TOKEN",
+          "description": "Legacy and optional. Google retired developer tokens on 9 September 2026",
+          "isRequired": false,
+          "isSecret": true,
           "format": "string"
         }
       ]

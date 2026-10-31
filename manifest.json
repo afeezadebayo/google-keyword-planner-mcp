@@ -2,9 +2,9 @@
   "manifest_version": "0.3",
   "name": "google-keyword-planner-mcp",
   "display_name": "Google Keyword Planner",
-  "version": "1.0.0",
+  "version": "1.1.0",
   "description": "Keyword ideas, search volumes, CPC ranges, trends and forecasts from Google Ads Keyword Planner.",
-  "long_description": "Research keywords with Google Ads Keyword Planner data from any MCP client. Generate ideas from seed keywords, a URL or a whole site; get monthly search volumes, competition and top-of-page bid ranges for exact keywords; forecast clicks and cost; and look up location and language IDs. Locations and languages accept plain names like \"Nigeria\" and \"English\". Requires a Google Ads account, a developer token with Basic access, and an OAuth client.",
+  "long_description": "Research keywords with Google Ads Keyword Planner data from any MCP client. Generate ideas from seed keywords, a URL or a whole site; get monthly search volumes, competition and top-of-page bid ranges for exact keywords; forecast clicks and cost; and look up location and language IDs. Locations and languages accept plain names like \"Nigeria\" and \"English\". Requires a Google Ads account and a Google Cloud OAuth client whose project has Basic access to the Google Ads API.",
   "author": {
     "name": "Afeez Adebayo",
     "url": "https://afeezadebayo.com"
@@ -76,17 +76,10 @@
     }
   ],
   "user_config": {
-    "developer_token": {
-      "type": "string",
-      "title": "Developer token",
-      "description": "From the API Center in your Google Ads manager account. Needs Basic access for real data.",
-      "sensitive": true,
-      "required": true
-    },
     "client_id": {
       "type": "string",
       "title": "OAuth client ID",
-      "description": "Google Cloud OAuth client (Desktop app).",
+      "description": "Google Cloud OAuth client (Desktop app). Its project needs Basic access to the Google Ads API.",
       "required": true
     },
     "client_secret": {
@@ -106,7 +99,7 @@
     "customer_id": {
       "type": "string",
       "title": "Customer ID",
-      "description": "The Google Ads account to query, e.g. 123-456-7890.",
+      "description": "The Google Ads account to query, e.g. 123-456-7890. Run list_accessible_customers to find it.",
       "required": true
     },
     "login_customer_id": {
@@ -127,6 +120,14 @@
       "type": "string",
       "title": "Default locations (optional)",
       "description": "Comma-separated names or IDs, e.g. Nigeria, United Kingdom.",
+      "required": false,
+      "default": ""
+    },
+    "developer_token": {
+      "type": "string",
+      "title": "Developer token (legacy, optional)",
+      "description": "Not needed. Google retired developer tokens on 9 September 2026; leave blank.",
+      "sensitive": true,
       "required": false,
       "default": ""
     }
