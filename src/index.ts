@@ -3,7 +3,7 @@ import { StdioServerTransport } from "@modelcontextprotocol/sdk/server/stdio.js"
 import { z } from "zod";
 import { AdsClient, AdsError, NETWORKS, formatMetrics, loadConfig, missingConfig, money } from "./ads.js";
 
-const VERSION = "1.0.0";
+const VERSION = "1.1.0";
 const cfg = loadConfig();
 const ads = new AdsClient(cfg);
 

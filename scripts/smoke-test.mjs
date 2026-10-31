@@ -81,6 +81,13 @@ await run(env, async (c) => {
   check(r.isError && r.content[0].text.includes("can't be combined"), "invalid seed combination rejected");
 });
 
+// 3. No developer token: requests still work and no developer-token header is sent.
+const { GOOGLE_ADS_DEVELOPER_TOKEN, ...envNoToken } = env;
+await run({ ...envNoToken, GOOGLE_ADS_DEVELOPER_TOKEN: "" }, async (c) => {
+  const r = await c.callTool({ name: "check_connection", arguments: {} });
+  check(!r.isError && !("developer-token" in seen.at(-1).headers), "works without a developer token and sends no token header");
+});
+
 mock.close();
 console.log(failures ? `\n${failures} check(s) failed` : "\nAll checks passed");
 process.exit(failures ? 1 : 0);
